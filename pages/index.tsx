@@ -8,6 +8,7 @@ const Home: NextPage = () => {
                 <title>Toffi</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
+            Test
         </>
     );
 };
