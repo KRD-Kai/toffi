@@ -72,7 +72,7 @@ const Home: NextPage = () => {
                             </Menu.Item>
                         </Menu>
                     </Navbar.Center>
-                    <Navbar.End>
+                    <Navbar.End className="overflow-hidden">
                         <ConnectButton
                             chainStatus="icon"
                             accountStatus="address"
