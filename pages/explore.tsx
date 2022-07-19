@@ -1,15 +1,15 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 
-const Home: NextPage = () => {
+const Explore: NextPage = () => {
     return (
         <>
             <Head>
-                <title>Toffi</title>
+                <title>Explore - Toffi</title>
             </Head>
-            Home
+            Explore
         </>
     );
 };
 
-export default Home;
+export default Explore;

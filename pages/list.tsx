@@ -1,15 +1,15 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 
-const Home: NextPage = () => {
+const List: NextPage = () => {
     return (
         <>
             <Head>
-                <title>Toffi</title>
+                <title>List - Toffi</title>
             </Head>
-            Home
+            List
         </>
     );
 };
 
-export default Home;
+export default List;
