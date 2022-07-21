@@ -2,13 +2,15 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { FormEvent, useState } from "react";
 import { Input, Button, InputGroup } from "react-daisyui";
+import NFTSearchResults from "../components/NFTSearchResults";
 
 const Explore: NextPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
-
-    function handleSearchSubmit(e: FormEvent) {
+    const [response, setResponse] = useState({});
+    async function handleSearchSubmit(e: FormEvent) {
         e.preventDefault();
-        alert(searchQuery);
+        const res = await searchForNFT(searchQuery);
+        setResponse(res);
     }
     return (
         <>
@@ -31,8 +33,15 @@ const Explore: NextPage = () => {
                     </InputGroup>
                 </form>
             </div>
+            <NFTSearchResults res={response} />
         </>
     );
 };
+
+async function searchForNFT(NFTQuery: string) {
+    const res = await fetch(`/api/search/${NFTQuery}`);
+    const resBody = await res.json();
+    return resBody;
+}
 
 export default Explore;
