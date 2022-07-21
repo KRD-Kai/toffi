@@ -56,7 +56,7 @@ const Explore: NextPage = () => {
 };
 
 async function searchForNFT(NFTQuery: string) {
-    const res = await fetch(`/api/search/${NFTQuery}`);
+    const res = await fetch(`/api/nft/search/${NFTQuery}`);
     const resBody = await res.json();
     return resBody;
 }
