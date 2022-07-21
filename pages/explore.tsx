@@ -6,10 +6,13 @@ import NFTSearchResults from "../components/NFTSearchResults";
 
 const Explore: NextPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [response, setResponse] = useState({});
+    const [response, setResponse] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     async function handleSearchSubmit(e: FormEvent) {
         e.preventDefault();
+        setIsLoading(true);
         const res = await searchForNFT(searchQuery);
+        setIsLoading(false);
         setResponse(res);
     }
     return (
@@ -17,6 +20,9 @@ const Explore: NextPage = () => {
             <Head>
                 <title>Explore - Toffi</title>
             </Head>
+            {isLoading && (
+                <progress className="progress w-100 p-0 align-top absolute"></progress>
+            )}
             <div className="max-w-lg pt-5 text-center m-auto">
                 <h1 className="text-4xl font-bold pb-4">
                     Find and bid on NFTs
@@ -33,7 +39,18 @@ const Explore: NextPage = () => {
                     </InputGroup>
                 </form>
             </div>
-            <NFTSearchResults res={response} />
+            {response && (
+                <div
+                    className="pt-5 gap-3 grid w-full place-items-center"
+                    style={{
+                        gridTemplateColumns:
+                            "repeat(auto-fill, minmax(400px, 1fr))",
+                        alignItems: "stretch",
+                    }}
+                >
+                    <NFTSearchResults res={response} />
+                </div>
+            )}
         </>
     );
 };
