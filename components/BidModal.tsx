@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Modal, Button } from "react-daisyui";
+import { useEffect, useState, FormEvent } from "react";
+import { Modal, Button, InputGroup, Input } from "react-daisyui";
 
 interface NFTData {
     chain: string;
@@ -29,6 +29,12 @@ export default function BidModal({
             setSaleRes(body);
         });
     }, [NFTData]);
+
+    const [bidValue, setBidValue] = useState("");
+    async function handleBidSubmit(e: FormEvent) {
+        e.preventDefault();
+        alert(bidValue);
+    }
 
     return (
         <Modal onClickBackdrop={onClickBackdrop} open={visible}>
@@ -85,7 +91,17 @@ export default function BidModal({
             </Modal.Body>
 
             <Modal.Actions>
-                <Button>Place bid</Button>
+                <form onSubmit={handleBidSubmit}>
+                    <InputGroup className="justify-center">
+                        <Input
+                            type="text"
+                            className="w-full"
+                            placeholder="ETH"
+                            onChange={(e) => setBidValue(e.target.value)}
+                        />
+                        <Button>Place bid</Button>
+                    </InputGroup>
+                </form>
             </Modal.Actions>
         </Modal>
     );
