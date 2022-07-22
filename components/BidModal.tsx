@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Modal, Button } from "react-daisyui";
 
 interface NFTData {
@@ -19,7 +20,16 @@ export default function BidModal({
     visible: boolean;
     onClickBackdrop: any;
 }) {
-    console.log(NFTData.contract_address, NFTData.token_id);
+    const [saleRes, setSaleRes] = useState<any>(null);
+    useEffect(() => {
+        fetch(
+            `api/nft/lastsale/${NFTData.contract_address}/${NFTData.token_id}`
+        ).then(async (res) => {
+            const body = await res.json();
+            setSaleRes(body);
+        });
+    }, [NFTData]);
+
     return (
         <Modal onClickBackdrop={onClickBackdrop} open={visible}>
             <Modal.Header className="font-bold">
@@ -59,6 +69,18 @@ export default function BidModal({
                             NFTData.token_id
                         )}
                     </a>
+                </div>
+                <div>
+                    Last sale:{" "}
+                    {saleRes?.transactions
+                        ? `${saleRes.transactions[0]?.price_details.price} ${
+                              saleRes.transactions[0]?.price_details
+                                  .contract_address ==
+                              "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+                                  ? "USDC"
+                                  : "ETH"
+                          }`
+                        : "----"}
                 </div>
             </Modal.Body>
 

@@ -38,11 +38,13 @@ export default function NFTCard({ NFTData }: { NFTData: NFTData }) {
                     </Card.Actions>
                 </Card.Body>
             </Card>
-            <BidModal
-                NFTData={NFTData}
-                visible={visible}
-                onClickBackdrop={toggleVisible}
-            />
+            {visible && (
+                <BidModal
+                    NFTData={NFTData}
+                    visible={visible}
+                    onClickBackdrop={toggleVisible}
+                />
+            )}
         </>
     );
 }
