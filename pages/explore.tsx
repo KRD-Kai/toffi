@@ -30,6 +30,7 @@ const Explore: NextPage = () => {
                 <form onSubmit={handleSearchSubmit}>
                     <InputGroup className="justify-center">
                         <Input
+                            required
                             type="text"
                             className="w-full"
                             placeholder="Search NFT"

@@ -95,6 +95,7 @@ export default function BidModal({
                     <InputGroup className="justify-center">
                         <Input
                             type="text"
+                            required
                             className="w-full"
                             placeholder="ETH"
                             onChange={(e) => setBidValue(e.target.value)}
