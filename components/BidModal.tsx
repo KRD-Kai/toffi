@@ -1,5 +1,5 @@
 import { useEffect, useState, FormEvent } from "react";
-import { Modal, Button, InputGroup, Input } from "react-daisyui";
+import { Modal, Button, InputGroup, Input, Select } from "react-daisyui";
 
 interface NFTData {
     chain: string;
@@ -93,11 +93,19 @@ export default function BidModal({
             <Modal.Actions>
                 <form onSubmit={handleBidSubmit}>
                     <InputGroup className="justify-center">
+                        <Select required>
+                            <Select.Option value={undefined} disabled selected>
+                                Choose Marketplace
+                            </Select.Option>
+                            <Select.Option value={"seaport"}>
+                                Opensea/Seaport
+                            </Select.Option>
+                        </Select>
                         <Input
                             type="text"
                             required
-                            className="w-full"
                             placeholder="ETH"
+                            className="text-xl w-full"
                             onChange={(e) => setBidValue(e.target.value)}
                         />
                         <Button>Place bid</Button>
