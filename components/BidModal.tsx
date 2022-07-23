@@ -1,5 +1,6 @@
 import { useEffect, useState, FormEvent } from "react";
 import { Modal, Button, InputGroup, Input, Select } from "react-daisyui";
+import { useAccount } from "wagmi";
 
 interface NFTData {
     chain: string;
@@ -35,6 +36,8 @@ export default function BidModal({
         e.preventDefault();
         alert(bidValue);
     }
+
+    const { address } = useAccount();
 
     return (
         <Modal onClickBackdrop={onClickBackdrop} open={visible}>
@@ -108,7 +111,11 @@ export default function BidModal({
                             className="text-xl w-full"
                             onChange={(e) => setBidValue(e.target.value)}
                         />
-                        <Button>Place bid</Button>
+                        {address ? (
+                            <Button>Place bid</Button>
+                        ) : (
+                            <Button disabled>Connect wallet</Button>
+                        )}
                     </InputGroup>
                 </form>
             </Modal.Actions>
