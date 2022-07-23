@@ -1,6 +1,6 @@
 import { useEffect, useState, FormEvent } from "react";
 import { Modal, Button, InputGroup, Input, Select } from "react-daisyui";
-import { useAccount, useProvider, useSigner } from "wagmi";
+import { useAccount, useNetwork } from "wagmi";
 import { Seaport } from "@opensea/seaport-js";
 import { ItemType } from "@opensea/seaport-js/lib/constants";
 import { parseEther } from "ethers/lib/utils";
@@ -25,8 +25,9 @@ export default function BidModal({
     onClickBackdrop: any;
 }) {
     const [saleRes, setSaleRes] = useState<any>(null);
-    const { address } = useAccount();
     const [seaport, setSeaport] = useState<any>(null);
+    const { address } = useAccount();
+    const { chain } = useNetwork();
 
     useEffect(() => {
         fetch(
@@ -130,7 +131,7 @@ export default function BidModal({
 
             <Modal.Actions>
                 <form onSubmit={handleBidSubmit}>
-                    <InputGroup className="justify-center">
+                    <InputGroup className="justify-center pb-2">
                         <Select required>
                             <Select.Option value={undefined} disabled selected>
                                 Choose Marketplace
@@ -142,16 +143,29 @@ export default function BidModal({
                         <Input
                             type="text"
                             required
-                            placeholder="ETH"
+                            placeholder="Bid amount"
                             className="text-xl w-full"
                             onChange={(e) => setBidValue(e.target.value)}
                         />
-                        {address ? (
-                            <Button onClick={createBid}>Place bid</Button>
-                        ) : (
-                            <Button disabled>Connect wallet</Button>
-                        )}
+                        <Select required>
+                            <Select.Option value={"weth"} selected>
+                                wETH
+                            </Select.Option>
+                            <Select.Option value={"usdc"}>USDC</Select.Option>
+                        </Select>
                     </InputGroup>
+                    {address ? (
+                        <Button
+                            className="w-full btn-primary "
+                            onClick={createBid}
+                        >
+                            Place bid
+                        </Button>
+                    ) : (
+                        <Button className="w-full" disabled>
+                            Connect wallet
+                        </Button>
+                    )}
                 </form>
             </Modal.Actions>
         </Modal>
