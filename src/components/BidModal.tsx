@@ -1,4 +1,4 @@
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent, ChangeEvent } from "react";
 import { Modal, Button, InputGroup, Input, Select } from "react-daisyui";
 import { useAccount, useNetwork } from "wagmi";
 import { Seaport } from "@opensea/seaport-js";
@@ -26,8 +26,16 @@ export default function BidModal({
 }) {
     const [saleRes, setSaleRes] = useState<any>(null);
     const [seaport, setSeaport] = useState<any>(null);
+    const [bidValue, setBidValue] = useState("");
+    const [bidToken, setBidToken] = useState("weth");
+    const [marketplace, setMarketplace] = useState("");
     const { address } = useAccount();
     const { chain } = useNetwork();
+
+    async function handleBidSubmit(e: FormEvent) {
+        e.preventDefault();
+        alert(bidValue + bidToken + marketplace);
+    }
 
     useEffect(() => {
         fetch(
@@ -43,11 +51,6 @@ export default function BidModal({
             setSeaport(seaport);
         }
     }, [NFTData]);
-
-    const [bidValue, setBidValue] = useState("");
-    async function handleBidSubmit(e: FormEvent) {
-        e.preventDefault();
-    }
 
     async function createBid() {
         const { executeAllActions } = await seaport.createOrder(
@@ -132,7 +135,10 @@ export default function BidModal({
             <Modal.Actions>
                 <form onSubmit={handleBidSubmit}>
                     <InputGroup className="justify-center pb-2">
-                        <Select required>
+                        <Select
+                            required
+                            onChange={(value: string) => setMarketplace(value)}
+                        >
                             <Select.Option value={undefined} disabled selected>
                                 Choose Marketplace
                             </Select.Option>
@@ -147,7 +153,11 @@ export default function BidModal({
                             className="text-xl w-full"
                             onChange={(e) => setBidValue(e.target.value)}
                         />
-                        <Select required>
+                        <Select
+                            required
+                            defaultValue={"weth"}
+                            onChange={(value: string) => setBidToken(value)}
+                        >
                             <Select.Option value={"weth"} selected>
                                 wETH
                             </Select.Option>
