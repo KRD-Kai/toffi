@@ -4,6 +4,7 @@ import { useAccount, useNetwork } from "wagmi";
 import { Seaport } from "@opensea/seaport-js";
 import { ItemType } from "@opensea/seaport-js/lib/constants";
 import { ethers } from "ethers";
+import { toast } from "react-toastify";
 import chains from "../chains.json";
 
 interface NFTData {
@@ -35,7 +36,12 @@ export default function BidModal({
 
     async function handleBidSubmit(e: FormEvent) {
         e.preventDefault();
-        alert(bidValue + bidToken + marketplace);
+
+        switch (marketplace) {
+            case "seaport":
+                createSeaportBid();
+                break;
+        }
     }
 
     useEffect(() => {
@@ -55,31 +61,36 @@ export default function BidModal({
 
     async function createSeaportBid() {
         if (!seaport) return;
-        // @ts-ignore
-        const token = chains[chain?.id].tokens[bidToken];
-        const { executeAllActions } = await seaport.createOrder(
-            {
-                offer: [
-                    {
-                        amount: ethers.utils
-                            .parseUnits(bidValue, token.decimals)
-                            .toString(),
-                        token: token.address,
-                    },
-                ],
-                consideration: [
-                    {
-                        itemType: ItemType.ERC721,
-                        token: "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
-                        identifier: "1",
-                        recipient: address,
-                    },
-                ],
-            },
-            address
-        );
-        const order = await executeAllActions();
-        console.log("Order:", order);
+        try {
+            // @ts-ignore
+            const token = chains[chain?.id].tokens[bidToken];
+            const { executeAllActions } = await seaport.createOrder(
+                {
+                    offer: [
+                        {
+                            amount: ethers.utils
+                                .parseUnits(bidValue, token.decimals)
+                                .toString(),
+                            token: token.address,
+                        },
+                    ],
+                    consideration: [
+                        {
+                            itemType: ItemType.ERC721,
+                            token: "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
+                            identifier: "1",
+                            recipient: address,
+                        },
+                    ],
+                },
+                address
+            );
+            const order = await executeAllActions();
+            toast.success("Offer created!");
+        } catch (err: any) {
+            console.error(err);
+            toast.error(err.message);
+        }
     }
 
     return (
@@ -170,8 +181,8 @@ export default function BidModal({
                     </InputGroup>
                     {address ? (
                         <Button
-                            className="w-full btn-primary "
-                            onClick={createSeaportBid}
+                            className="w-full btn-primary"
+                            disabled={!(marketplace && bidValue)}
                         >
                             Place bid
                         </Button>
