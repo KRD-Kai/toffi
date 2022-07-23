@@ -2,12 +2,23 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { FormEvent, useState } from "react";
 import { Input, Button, InputGroup } from "react-daisyui";
+import { useNetwork } from "wagmi";
 import NFTSearchResults from "../components/NFTSearchResults";
 
 const Explore: NextPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [response, setResponse] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const { chain } = useNetwork();
+
+    async function searchForNFT(NFTQuery: string) {
+        const res = await fetch(
+            `/api/nft/search/${NFTQuery}?chainId=${chain?.id}`
+        );
+        const resBody = await res.json();
+        return resBody;
+    }
+
     async function handleSearchSubmit(e: FormEvent) {
         e.preventDefault();
         setIsLoading(true);
@@ -55,11 +66,5 @@ const Explore: NextPage = () => {
         </>
     );
 };
-
-async function searchForNFT(NFTQuery: string) {
-    const res = await fetch(`/api/nft/search/${NFTQuery}`);
-    const resBody = await res.json();
-    return resBody;
-}
 
 export default Explore;
