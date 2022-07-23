@@ -1,6 +1,7 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Navbar, Menu, Button, Dropdown } from "react-daisyui";
 import NextLink from "next/link";
+import Image from "next/image";
 
 const navbar = () => {
     return (
@@ -42,8 +43,15 @@ const navbar = () => {
                             </Dropdown.Menu>
                         </Dropdown>
                         <NextLink href="/">
-                            <a className="btn btn-ghost normal-case text-xl">
-                                Toffi
+                            <a className="btn btn-link relative w-20 p-100">
+                                <Image
+                                    width="90"
+                                    height="90"
+                                    layout="fill"
+                                    objectFit="contain"
+                                    src="/logo.png"
+                                    alt="hi"
+                                />
                             </a>
                         </NextLink>
                     </Navbar.Start>
