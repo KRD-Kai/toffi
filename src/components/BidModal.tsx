@@ -26,7 +26,7 @@ export default function BidModal({
     onClickBackdrop: any;
 }) {
     const [saleRes, setSaleRes] = useState<any>(null);
-    const [seaport, setSeaport] = useState<any>(null);
+    const [seaport, setSeaport] = useState<Seaport>();
     const [bidValue, setBidValue] = useState("");
     const [bidToken, setBidToken] = useState("weth");
     const [marketplace, setMarketplace] = useState("");
@@ -48,12 +48,13 @@ export default function BidModal({
         if (typeof window.ethereum !== "undefined") {
             // @ts-ignore
             const provider = new ethers.providers.Web3Provider(window.ethereum);
-            let seaport: any = new Seaport(provider);
+            let seaport: Seaport = new Seaport(provider);
             setSeaport(seaport);
         }
     }, [NFTData]);
 
     async function createSeaportBid() {
+        if (!seaport) return;
         // @ts-ignore
         const token = chains[chain?.id].tokens[bidToken];
         const { executeAllActions } = await seaport.createOrder(
