@@ -3,8 +3,9 @@ import { Modal, Button, InputGroup, Input, Select } from "react-daisyui";
 import { useAccount, useNetwork } from "wagmi";
 import { Seaport } from "@opensea/seaport-js";
 import { ItemType } from "@opensea/seaport-js/lib/constants";
-import { parseEther } from "ethers/lib/utils";
 import { ethers } from "ethers";
+import chains from "../chains.json";
+
 interface NFTData {
     chain: string;
     contract_address: string;
@@ -52,15 +53,17 @@ export default function BidModal({
         }
     }, [NFTData]);
 
-    async function createBid() {
+    async function createSeaportBid() {
+        // @ts-ignore
+        const token = chains[chain?.id].tokens[bidToken];
         const { executeAllActions } = await seaport.createOrder(
             {
                 offer: [
                     {
-                        amount: 1, //'parseEther("0.00000001").toString()',
-                        // USDC
-                        // token: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                        token: "0xe11A86849d99F524cAC3E7A0Ec1241828e332C62",
+                        amount: ethers.utils
+                            .parseUnits(bidValue, token.decimals)
+                            .toString(),
+                        token: token.address,
                     },
                 ],
                 consideration: [
@@ -167,7 +170,7 @@ export default function BidModal({
                     {address ? (
                         <Button
                             className="w-full btn-primary "
-                            onClick={createBid}
+                            onClick={createSeaportBid}
                         >
                             Place bid
                         </Button>
