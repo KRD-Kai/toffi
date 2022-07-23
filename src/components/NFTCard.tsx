@@ -24,6 +24,11 @@ export default function NFTCard({ NFTData }: { NFTData: NFTData }) {
                 <Card.Image
                     style={{ height: "20em" }}
                     src={NFTData.cached_file_url}
+                    onError={({ currentTarget }) => {
+                        currentTarget.onerror = null; // prevents looping
+                        currentTarget.src =
+                            "https://via.placeholder.com/1000/252b3a/c?text=No+image";
+                    }}
                     alt="NFT pic"
                 />
                 <Card.Body>
