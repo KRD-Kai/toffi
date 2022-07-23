@@ -1,7 +1,10 @@
 import { useEffect, useState, FormEvent } from "react";
 import { Modal, Button, InputGroup, Input, Select } from "react-daisyui";
-import { useAccount } from "wagmi";
-
+import { useAccount, useProvider, useSigner } from "wagmi";
+import { Seaport } from "@opensea/seaport-js";
+import { ItemType } from "@opensea/seaport-js/lib/constants";
+import { parseEther } from "ethers/lib/utils";
+import { ethers } from "ethers";
 interface NFTData {
     chain: string;
     contract_address: string;
@@ -22,6 +25,9 @@ export default function BidModal({
     onClickBackdrop: any;
 }) {
     const [saleRes, setSaleRes] = useState<any>(null);
+    const { address } = useAccount();
+    const [seaport, setSeaport] = useState<any>(null);
+
     useEffect(() => {
         fetch(
             `api/nft/lastsale/${NFTData.contract_address}/${NFTData.token_id}`
@@ -29,15 +35,44 @@ export default function BidModal({
             const body = await res.json();
             setSaleRes(body);
         });
+        if (typeof window.ethereum !== "undefined") {
+            // @ts-ignore
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            let seaport: any = new Seaport(provider);
+            setSeaport(seaport);
+        }
     }, [NFTData]);
 
     const [bidValue, setBidValue] = useState("");
     async function handleBidSubmit(e: FormEvent) {
         e.preventDefault();
-        alert(bidValue);
     }
 
-    const { address } = useAccount();
+    async function createBid() {
+        const { executeAllActions } = await seaport.createOrder(
+            {
+                offer: [
+                    {
+                        amount: 1, //'parseEther("0.00000001").toString()',
+                        // USDC
+                        // token: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                        token: "0xe11A86849d99F524cAC3E7A0Ec1241828e332C62",
+                    },
+                ],
+                consideration: [
+                    {
+                        itemType: ItemType.ERC721,
+                        token: "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
+                        identifier: "1",
+                        recipient: address,
+                    },
+                ],
+            },
+            address
+        );
+        const order = await executeAllActions();
+        console.log("Order:", order);
+    }
 
     return (
         <Modal onClickBackdrop={onClickBackdrop} open={visible}>
@@ -112,7 +147,7 @@ export default function BidModal({
                             onChange={(e) => setBidValue(e.target.value)}
                         />
                         {address ? (
-                            <Button>Place bid</Button>
+                            <Button onClick={createBid}>Place bid</Button>
                         ) : (
                             <Button disabled>Connect wallet</Button>
                         )}

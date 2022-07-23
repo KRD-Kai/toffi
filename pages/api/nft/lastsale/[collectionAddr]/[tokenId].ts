@@ -4,7 +4,6 @@ export default async function requestHandler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    console.log(req.query);
     const { collectionAddr, tokenId } = req.query;
     // const response = await fetch(
     //     `https://api.covalenthq.com/v1/1/nft_market/collection/${collectionAddr}/token_id/${tokenId}/sales/?key=${process.env.COVALENT_APIKEY}?chain=polygon`

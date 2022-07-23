@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@opensea/seaport-js": "^1.0.4",
     "@rainbow-me/rainbowkit": "^0.4.2",
     "daisyui": "^2.19.0",
     "ethers": "^5.0.0",
@@ -17,7 +18,6 @@
     "react": "^18.1.0",
     "react-daisyui": "^2.0.6",
     "react-dom": "^18.1.0",
-    "seaport-js": "^1.1.10",
     "wagmi": "^0.5.3"
   },
   "devDependencies": {
