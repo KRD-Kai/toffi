@@ -17,6 +17,7 @@
     "react": "^18.1.0",
     "react-daisyui": "^2.0.6",
     "react-dom": "^18.1.0",
+    "seaport-js": "^1.1.10",
     "wagmi": "^0.5.3"
   },
   "devDependencies": {

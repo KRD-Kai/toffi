@@ -21,6 +21,6 @@ export default async function requestHandler(
         }
     );
     const resBody = await response.json();
-    console.log(resBody.transactions[0].price_details);
+    console.log(resBody.transactions[0]?.price_details);
     res.status(response.status).json(resBody);
 }
