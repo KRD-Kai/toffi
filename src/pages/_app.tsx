@@ -10,6 +10,9 @@ import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import Layout from "../components/layout/Layout";
+import Script from "next/script";
+import { db } from "../db";
+import { useState } from "react";
 
 const { chains, provider, webSocketProvider } = configureChains(
     [
@@ -42,8 +45,25 @@ const wagmiClient = createClient({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
+    let scriptsLoaded = 0;
+    function handleScriptLoaded() {
+        scriptsLoaded++;
+        if (scriptsLoaded == 2) {
+            return db.init();
+        }
+    }
     return (
         <WagmiConfig client={wagmiClient}>
+            <Script
+                onLoad={handleScriptLoaded}
+                id="ipfs-script"
+                src="https://unpkg.com/ipfs@0.55.1/dist/index.min.js"
+            ></Script>
+            <Script
+                onLoad={handleScriptLoaded}
+                id="orbitdb-script"
+                src="https://unpkg.com/orbit-db@0.26.1/dist/orbitdb.min.js"
+            ></Script>
             <RainbowKitProvider chains={chains} theme={darkTheme()}>
                 <Layout>
                     <Component {...pageProps} />
