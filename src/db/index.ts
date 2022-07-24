@@ -58,7 +58,7 @@ class Database extends EventEmitter {
         }));
     }
 
-    getOffers(key: string): Offer {
+    getOffers(key: string): [Offer] {
         this.OffersKey = key;
         this.Offers = this.offerStore.get(this.OffersKey);
         return this.Offers;

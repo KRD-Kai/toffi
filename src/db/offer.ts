@@ -1,7 +1,7 @@
-import { OrderParameters } from "@opensea/seaport-js/lib/types";
+import { OrderComponents } from "@opensea/seaport-js/lib/types";
 
 export interface Offer {
-    parameters: OrderParameters;
+    parameters: OrderComponents;
     signature: string;
     type: "bid" | "list";
     market: "seaport";

@@ -5,9 +5,10 @@ import { Seaport } from "@opensea/seaport-js";
 import { useAccount, useNetwork } from "wagmi";
 import { ethers } from "ethers";
 import { db } from "../db";
+import { Offer } from "../db/offer";
 
 const Offers: NextPage = () => {
-    const [incomingOffers, setIncomingOffers] = useState();
+    const [incomingOffers, setIncomingOffers] = useState<Offer[]>();
     // const [seaport, setSeaport] = useState<Seaport>();
     const { address } = useAccount();
     const { chain } = useNetwork();
@@ -29,11 +30,27 @@ const Offers: NextPage = () => {
                 const nfts = resBody.ownedNfts;
                 for (const nft of nfts) {
                     const tokenId = parseInt(nft.id.tokenId, 16);
-                    db.on("ready", () => {
+                    db.on("ready", async () => {
                         const offers = db.getOffers(
                             `${nft.contract.address}/${tokenId}`
                         );
-                        console.log(offers);
+                        let validOffers: Offer[] = [];
+                        for (const offer of offers) {
+                            const orderHash = seaport.getOrderHash(
+                                offer.parameters
+                            );
+                            const status = await seaport.getOrderStatus(
+                                orderHash
+                            );
+                            if (
+                                status.isCancelled ||
+                                status.totalFilled.gt(0) //check if order has been filled
+                            ) {
+                                return;
+                            }
+                            validOffers.push(offer);
+                        }
+                        setIncomingOffers(validOffers);
                     });
                 }
             } catch (err: any) {
