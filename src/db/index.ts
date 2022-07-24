@@ -1,13 +1,13 @@
 // @ts-nocheck
+import EventEmitter from "events";
 import { Offer, KeyedOffers } from "./offer";
 
-class Database {
+class Database extends EventEmitter {
     ipfs: any;
     orbitdb: any;
     offerStore: any;
     OffersKey: string;
     Offers: [Offer];
-    readonly: boolean;
 
     async init() {
         // Create IPFS instance
@@ -42,14 +42,13 @@ class Database {
             },
         });
         await this.offerStore.load();
-
+        this.emit("ready");
         // Update the value following replication
         this.offerStore.events.on("replicated", (e) => {
             this.Offers = this.offerStore.get(this.OffersKey);
             console.log(this.Offers);
             console.log("test", e);
         });
-        console.log(this);
     }
 
     getKeyedOffers(): KeyedOffer[] {
