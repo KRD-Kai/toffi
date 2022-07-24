@@ -67,6 +67,11 @@ const navbar = () => {
                                     <a>List NFT</a>
                                 </NextLink>
                             </Menu.Item>
+                            <Menu.Item>
+                                <NextLink href="offers">
+                                    <a>Offers</a>
+                                </NextLink>
+                            </Menu.Item>
                         </Menu>
                     </Navbar.Center>
                     <Navbar.End className="overflow-hidden">
