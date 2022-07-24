@@ -9,6 +9,7 @@ import { Offer } from "../db/offer";
 import { toast } from "react-toastify";
 import { Table, Button, Mask, Checkbox, Badge } from "react-daisyui";
 import tokens from "../tokens.json";
+import { OrderWithCounter } from "@opensea/seaport-js/lib/types";
 
 const Offers: NextPage = () => {
     const [incomingOffers, setIncomingOffers] = useState<Offer[]>([]);
@@ -34,6 +35,12 @@ const Offers: NextPage = () => {
                 );
                 const resBody = await res.json();
                 const nfts = resBody.ownedNfts;
+                console.log(nfts);
+                if (!nfts.length) {
+                    setIncomingOffers([]);
+                    setIsLoading(false);
+                    return;
+                }
                 for (const nft of nfts) {
                     const tokenId = parseInt(nft.id.tokenId, 16);
                     const setValidOffers = async () => {
@@ -42,7 +49,8 @@ const Offers: NextPage = () => {
                         );
                         if (!offers) {
                             setIncomingOffers([]);
-                            return setIsLoading(false);
+                            setIsLoading(false);
+                            return;
                         }
                         let validOffers: Offer[] = [];
                         for (const offer of offers) {
@@ -75,6 +83,25 @@ const Offers: NextPage = () => {
         getIncomingOrders();
     }, [address, chain]);
 
+    async function acceptBidOffer(offer: Offer) {
+        if (!seaport) return;
+        const order: OrderWithCounter = {
+            parameters: offer.parameters,
+            signature: offer.signature,
+        };
+        try {
+            console.log(order);
+            const { executeAllActions: executeAllFulfillActions } =
+                await seaport.fulfillOrder({
+                    order,
+                    accountAddress: address,
+                });
+
+            const transaction = await executeAllFulfillActions();
+        } catch (err: any) {
+            console.error(err);
+        }
+    }
     return (
         <>
             <Head>
@@ -160,7 +187,13 @@ const Offers: NextPage = () => {
                                                 ) * 1000
                                             ).toDateString()}
                                         </div>
-                                        <Button>Accept</Button>
+                                        <Button
+                                            onClick={() =>
+                                                acceptBidOffer(offer)
+                                            }
+                                        >
+                                            Accept
+                                        </Button>
                                     </Table.Row>
                                 ))}
                             </Table.Body>

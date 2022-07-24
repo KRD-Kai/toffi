@@ -6,7 +6,6 @@ export default async function requestHandler(
 ) {
     const { addr, chain_id } = req.query;
     let chain: string;
-    console.log(chain_id);
     switch (chain_id) {
         case "137":
             chain = "polygon-mainnet";
@@ -17,7 +16,6 @@ export default async function requestHandler(
         default:
             chain = "eth-mainnet";
     }
-    console.log(chain);
     //Use alchemy for mumbai support
     const response = await fetch(
         `https://${chain}.alchemyapi.io/nft/v2/demo/getNFTs/?owner=${addr}`,

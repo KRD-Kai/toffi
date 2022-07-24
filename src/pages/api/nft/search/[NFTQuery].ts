@@ -18,6 +18,16 @@ export default async function requestHandler(
                     description: "Test token for Hackfs demo",
                     mint_date: "",
                 },
+                {
+                    chain: "mumbai",
+                    contract_address:
+                        "0xb4f93d4e0ee66f4bf850120776e47994bdc33daa",
+                    token_id: "323",
+                    cached_file_url: "",
+                    name: "Hackfs demo #2",
+                    description: "Test token for Hackfs demo",
+                    mint_date: "",
+                },
             ],
         };
         return res.status(200).json(testData);
