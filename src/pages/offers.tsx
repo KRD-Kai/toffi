@@ -7,9 +7,11 @@ import { ethers } from "ethers";
 import { db } from "../db";
 import { Offer } from "../db/offer";
 import { toast } from "react-toastify";
+import { Table, Button, Mask, Checkbox, Badge } from "react-daisyui";
+import tokens from "../tokens.json";
 
 const Offers: NextPage = () => {
-    const [incomingOffers, setIncomingOffers] = useState<Offer[]>();
+    const [incomingOffers, setIncomingOffers] = useState<Offer[]>([]);
     const [seaport, setSeaport] = useState<Seaport>();
     const [isLoading, setIsLoading] = useState(false);
     const { address } = useAccount();
@@ -38,8 +40,13 @@ const Offers: NextPage = () => {
                         const offers = db.getOffers(
                             `${nft.contract.address}/${tokenId}`
                         );
+                        if (!offers) {
+                            setIncomingOffers([]);
+                            return setIsLoading(false);
+                        }
                         let validOffers: Offer[] = [];
                         for (const offer of offers) {
+                            console.log(offer);
                             const orderHash = seaport.getOrderHash(
                                 offer.parameters
                             );
@@ -76,7 +83,93 @@ const Offers: NextPage = () => {
             {isLoading && (
                 <progress className="progress w-100 p-0 align-top absolute"></progress>
             )}
-            Offers
+            <div className="overflow-x-auto pt-5 text-center">
+                {incomingOffers.length !== 0 ? (
+                    <>
+                        <h1 className="text-2xl font-bold pb-1">
+                            Incoming offers:
+                        </h1>
+                        <Table className="rounded-box m-auto">
+                            <Table.Head>
+                                <span>NFT</span>
+                                <span>Offer</span>
+                                <span>Bidder</span>
+                                <span>Created</span>
+                                <span />
+                            </Table.Head>
+
+                            <Table.Body>
+                                {incomingOffers.map((offer, i) => (
+                                    <Table.Row key={i}>
+                                        <div className="flex items-center space-x-3 truncate relative">
+                                            <Mask
+                                                variant="squircle"
+                                                src="https://via.placeholder.com/1000/252b3a/c?text=No+image"
+                                                style={{ maxHeight: "5em" }}
+                                            />
+                                            <div>
+                                                <div className="font-bold">
+                                                    {offer.parameters.consideration[0].token.substring(
+                                                        0,
+                                                        5
+                                                    )}
+                                                    ...
+                                                    {offer.parameters.offerer.slice(
+                                                        -3
+                                                    )}
+                                                </div>
+                                                <div className="text-sm opacity-50">
+                                                    #
+                                                    {
+                                                        offer.parameters
+                                                            .consideration[0]
+                                                            .identifierOrCriteria
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            {ethers.utils.formatUnits(
+                                                offer.parameters.offer[0]
+                                                    .startAmount,
+                                                offer.tokenDecimals
+                                            )}{" "}
+                                            {
+                                                // @ts-ignore
+                                                tokens[
+                                                    offer.parameters.offer[0].token.toLowerCase()
+                                                ].symbol
+                                            }
+                                            <br />
+                                            <Badge color="ghost" size="sm">
+                                                {offer.market}
+                                            </Badge>
+                                        </div>
+                                        <div>
+                                            {offer.parameters.offerer.substring(
+                                                0,
+                                                5
+                                            )}
+                                            ...
+                                            {offer.parameters.offerer.slice(-3)}
+                                        </div>
+                                        <div>
+                                            {new Date(
+                                                Number(
+                                                    offer.parameters.startTime.toString()
+                                                ) * 1000
+                                            ).toDateString()}
+                                        </div>
+                                        <Button>Accept</Button>
+                                    </Table.Row>
+                                ))}
+                            </Table.Body>
+                        </Table>
+                    </>
+                ) : (
+                    !isLoading && "No offers"
+                )}
+            </div>
         </>
     );
 };

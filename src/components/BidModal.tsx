@@ -97,6 +97,7 @@ export default function BidModal({
                 type: "bid",
                 market: "seaport",
                 networkId: chain?.id,
+                tokenDecimals: token.decimals,
             });
 
             console.log(order);

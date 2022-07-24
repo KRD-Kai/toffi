@@ -6,6 +6,7 @@ export interface Offer {
     type: "bid" | "list";
     market: "seaport";
     networkId: number;
+    tokenDecimals: number;
 }
 
 export interface KeyedOffers {

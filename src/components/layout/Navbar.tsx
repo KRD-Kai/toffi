@@ -40,6 +40,9 @@ const navbar = () => {
                                 <NextLink href="list">
                                     <Dropdown.Item>List NFT</Dropdown.Item>
                                 </NextLink>
+                                <NextLink href="offers">
+                                    <Dropdown.Item>Offers</Dropdown.Item>
+                                </NextLink>
                             </Dropdown.Menu>
                         </Dropdown>
                         <NextLink href="/">

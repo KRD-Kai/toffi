@@ -70,7 +70,11 @@ class Database extends EventEmitter {
 
     setOffer(key: string, Offer: Partial<Offer>) {
         const offers = this.getOffers(key);
-        this.Offers = [...offers, Offer];
+        if (offers) {
+            this.Offers = [...offers, Offer];
+        } else {
+            this.Offers = [Offer];
+        }
         this.offerStore.put(key, this.Offers);
     }
 }
