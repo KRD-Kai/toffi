@@ -98,6 +98,7 @@ const Offers: NextPage = () => {
                 });
 
             const transaction = await executeAllFulfillActions();
+            toast.success("Offer completed!");
         } catch (err: any) {
             console.error(err);
         }
