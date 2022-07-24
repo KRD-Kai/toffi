@@ -54,7 +54,7 @@ const Explore: NextPage = () => {
             </div>
             {response && (
                 <div
-                    className="pt-5 gap-3 grid w-full place-items-center"
+                    className="pt-5 pb-5 pl-3 pr-3 gap-3 grid w-full place-items-center"
                     style={{
                         gridTemplateColumns:
                             "repeat(auto-fill, minmax(400px, 1fr))",

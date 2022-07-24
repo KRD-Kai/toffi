@@ -37,9 +37,9 @@ const navbar = () => {
                                 <NextLink href="explore">
                                     <Dropdown.Item>Explore/Bid</Dropdown.Item>
                                 </NextLink>
-                                <NextLink href="list">
+                                {/* <NextLink href="list">
                                     <Dropdown.Item>List NFT</Dropdown.Item>
-                                </NextLink>
+                                </NextLink> */}
                                 <NextLink href="offers">
                                     <Dropdown.Item>Offers</Dropdown.Item>
                                 </NextLink>
@@ -65,11 +65,11 @@ const navbar = () => {
                                     <a>Explore/Bid</a>
                                 </NextLink>
                             </Menu.Item>
-                            <Menu.Item>
+                            {/* <Menu.Item>
                                 <NextLink href="list">
                                     <a>List NFT</a>
                                 </NextLink>
-                            </Menu.Item>
+                            </Menu.Item> */}
                             <Menu.Item>
                                 <NextLink href="offers">
                                     <a>Offers</a>

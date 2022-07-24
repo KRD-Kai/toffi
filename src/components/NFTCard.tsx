@@ -20,7 +20,7 @@ export default function NFTCard({ NFTData }: { NFTData: NFTData }) {
     };
     return (
         <>
-            <Card className="w-full bg-100 shadow-xl inline-block border">
+            <Card className="w-full bg-300 shadow-xl inline-block border-4">
                 <Card.Image
                     style={{ height: "20em" }}
                     src={NFTData.cached_file_url}
