@@ -87,6 +87,7 @@ export default function BidModal({
             );
             const order = await executeAllActions();
             toast.success("Offer created!");
+            console.log(order);
         } catch (err: any) {
             console.error(err);
             toast.error(err.message);
