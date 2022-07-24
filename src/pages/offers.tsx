@@ -10,7 +10,8 @@ import { toast } from "react-toastify";
 
 const Offers: NextPage = () => {
     const [incomingOffers, setIncomingOffers] = useState<Offer[]>();
-    // const [seaport, setSeaport] = useState<Seaport>();
+    const [seaport, setSeaport] = useState<Seaport>();
+    const [isLoading, setIsLoading] = useState(false);
     const { address } = useAccount();
     const { chain } = useNetwork();
 
@@ -20,8 +21,10 @@ const Offers: NextPage = () => {
             // @ts-ignore
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             seaport = new Seaport(provider);
+            setSeaport(seaport);
         }
         async function getIncomingOrders() {
+            setIsLoading(true);
             try {
                 if (!seaport) return;
                 const res = await fetch(
@@ -31,7 +34,7 @@ const Offers: NextPage = () => {
                 const nfts = resBody.ownedNfts;
                 for (const nft of nfts) {
                     const tokenId = parseInt(nft.id.tokenId, 16);
-                    db.on("ready", async () => {
+                    const setValidOffers = async () => {
                         const offers = db.getOffers(
                             `${nft.contract.address}/${tokenId}`
                         );
@@ -52,10 +55,14 @@ const Offers: NextPage = () => {
                             validOffers.push(offer);
                         }
                         setIncomingOffers(validOffers);
-                    });
+                        setIsLoading(false);
+                    };
+                    if (db.initialized) return await setValidOffers();
+                    db.on("ready", setValidOffers);
                 }
             } catch (err: any) {
                 toast.error("Error getting offers");
+                setIsLoading(false);
             }
         }
         getIncomingOrders();
@@ -66,6 +73,9 @@ const Offers: NextPage = () => {
             <Head>
                 <title>Offers - Toffi</title>
             </Head>
+            {isLoading && (
+                <progress className="progress w-100 p-0 align-top absolute"></progress>
+            )}
             Offers
         </>
     );

@@ -8,7 +8,9 @@ class Database extends EventEmitter {
     offerStore: any;
     OffersKey: string;
     Offers: [Offer];
+    initialized: boolean;
 
+    initialized: false;
     async init() {
         // Create IPFS instance
         this.ipfs = window["ipfs"];
@@ -43,6 +45,8 @@ class Database extends EventEmitter {
         });
         await this.offerStore.load();
         this.emit("ready");
+        this.initialized = true;
+
         // Update the value following replication
         this.offerStore.events.on("replicated", (e) => {
             this.Offers = this.offerStore.get(this.OffersKey);
