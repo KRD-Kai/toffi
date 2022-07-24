@@ -6,6 +6,7 @@ import { useAccount, useNetwork } from "wagmi";
 import { ethers } from "ethers";
 import { db } from "../db";
 import { Offer } from "../db/offer";
+import { toast } from "react-toastify";
 
 const Offers: NextPage = () => {
     const [incomingOffers, setIncomingOffers] = useState<Offer[]>();
@@ -54,7 +55,7 @@ const Offers: NextPage = () => {
                     });
                 }
             } catch (err: any) {
-                console.error(err);
+                toast.error("Error getting offers");
             }
         }
         getIncomingOrders();
