@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { Input, Button, InputGroup } from "react-daisyui";
 import { useNetwork } from "wagmi";
 import NFTSearchResults from "../components/NFTSearchResults";
+import { db } from "../db";
 
 const Explore: NextPage = () => {
     const [searchQuery, setSearchQuery] = useState("");

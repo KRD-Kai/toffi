@@ -1,12 +1,12 @@
 // @ts-nocheck
-import { Offer, KeyedOffer } from "./offer";
+import { Offer, KeyedOffers } from "./offer";
 
 class Database {
     ipfs: any;
     orbitdb: any;
     offerStore: any;
-    OfferKey: string;
-    Offer: Offer;
+    OffersKey: string;
+    Offers: [Offer];
     readonly: boolean;
 
     async init() {
@@ -35,9 +35,8 @@ class Database {
         // Create OrbitDB instance
         const OrbitDB = window["OrbitDB"];
         this.orbitdb = await OrbitDB.createInstance(this.ipfs);
-
         // Create/open a key-value store called 'Offer' and load its data
-        this.offerStore = await this.orbitdb.keyvalue("Offer", {
+        this.offerStore = await this.orbitdb.keyvalue("offers", {
             accessController: {
                 write: ["*"],
             },
@@ -45,29 +44,31 @@ class Database {
         await this.offerStore.load();
 
         // Update the value following replication
-        this.offerStore.events.on(
-            "replicated",
-            () => (this.Offer = this.offerStore.get(this.OfferKey))
-        );
+        this.offerStore.events.on("replicated", (e) => {
+            this.Offers = this.offerStore.get(this.OffersKey);
+            console.log(this.Offers);
+            console.log("test", e);
+        });
         console.log(this);
     }
 
-    getKeyedOfferes(): KeyedOffer[] {
+    getKeyedOffers(): KeyedOffer[] {
         return Object.entries(this.offerStore.all).map((e) => ({
             key: e[0],
-            Offer: e[1] as Offer,
+            Offers: e[1] as KeyedOffers,
         }));
     }
 
-    getOffer(key: string): Offer {
-        this.OfferKey = key;
-        this.Offer = this.offerStore.get(this.OfferKey);
-        return this.Offer;
+    getOffers(key: string): Offer {
+        this.OffersKey = key;
+        this.Offers = this.offerStore.get(this.OffersKey);
+        return this.Offers;
     }
 
-    setOffer(Offer: Partial<Offer>) {
-        this.Offer = { ...this.Offer, ...Offer };
-        this.offerStore.put("key", this.Offer);
+    setOffer(key: string, Offer: Partial<Offer>) {
+        const offers = this.getOffers(key);
+        this.Offers = [...offers, Offer];
+        this.offerStore.put(key, this.Offers);
     }
 }
 

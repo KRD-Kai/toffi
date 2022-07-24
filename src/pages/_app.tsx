@@ -12,7 +12,6 @@ import { publicProvider } from "wagmi/providers/public";
 import Layout from "../components/layout/Layout";
 import Script from "next/script";
 import { db } from "../db";
-import { useState } from "react";
 
 const { chains, provider, webSocketProvider } = configureChains(
     [
@@ -41,7 +40,6 @@ const wagmiClient = createClient({
     autoConnect: true,
     connectors,
     provider,
-    webSocketProvider,
 });
 
 function MyApp({ Component, pageProps }: AppProps) {

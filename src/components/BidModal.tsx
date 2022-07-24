@@ -6,6 +6,8 @@ import { ItemType } from "@opensea/seaport-js/lib/constants";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import chains from "../chains.json";
+import { db } from "../db";
+import { off } from "process";
 
 interface NFTData {
     chain: string;
@@ -77,8 +79,8 @@ export default function BidModal({
                     consideration: [
                         {
                             itemType: ItemType.ERC721,
-                            token: "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
-                            identifier: "1",
+                            token: NFTData.contract_address,
+                            identifier: NFTData.token_id,
                             recipient: address,
                         },
                     ],
@@ -87,6 +89,16 @@ export default function BidModal({
             );
             const order = await executeAllActions();
             toast.success("Offer created!");
+            const offerKey =
+                NFTData.contract_address.toLowerCase() + "/" + NFTData.token_id;
+            db.setOffer(offerKey, {
+                parameters: order.parameters,
+                signature: order.signature,
+                type: "bid",
+                market: "seaport",
+                networkId: chain?.id,
+            });
+
             console.log(order);
         } catch (err: any) {
             console.error(err);

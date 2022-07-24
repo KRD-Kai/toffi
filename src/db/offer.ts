@@ -4,11 +4,11 @@ export interface Offer {
     parameters: OrderParameters;
     signature: string;
     type: "bid" | "list";
-    market: "opensea";
+    market: "seaport";
     networkId: number;
 }
 
-export interface KeyedOffer {
+export interface KeyedOffers {
     key: string;
-    offer: Offer;
+    offers: [Offer];
 }
