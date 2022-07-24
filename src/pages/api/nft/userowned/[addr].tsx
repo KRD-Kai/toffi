@@ -4,21 +4,23 @@ export default async function requestHandler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const { addr, chainId } = req.query;
+    const { addr, chain_id } = req.query;
     let chain: string;
-    switch (chainId) {
+    console.log(chain_id);
+    switch (chain_id) {
         case "137":
             chain = "polygon-mainnet";
             break;
         case "80001":
-            chain = "polygon-mumbai";
+            chain = "polygon-mumbai.g";
             break;
         default:
-            chain = "ethereum-mainnet";
+            chain = "eth-mainnet";
     }
+    console.log(chain);
     //Use alchemy for mumbai support
     const response = await fetch(
-        `https://${chain}.g.alchemyapi.io/nft/v2/demo/getNFTs/?owner=${addr}`,
+        `https://${chain}.alchemyapi.io/nft/v2/demo/getNFTs/?owner=${addr}`,
         {
             method: "GET",
             headers: {
