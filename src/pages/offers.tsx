@@ -35,24 +35,26 @@ const Offers: NextPage = () => {
                 );
                 const resBody = await res.json();
                 const nfts = resBody.ownedNfts;
-                console.log(nfts);
+                console.log("OWNED NFTS", nfts);
                 if (!nfts.length) {
                     setIncomingOffers([]);
                     setIsLoading(false);
                     return;
                 }
-                for (const nft of nfts) {
-                    const tokenId = parseInt(nft.id.tokenId, 16);
-                    const setValidOffers = async () => {
+                let validOffers: Offer[] = [];
+                const setValidOffers = async () => {
+                    for (const nft of nfts) {
+                        console.log(nft.contract.address);
+                        const tokenId = parseInt(nft.id.tokenId, 16);
+
                         const offers = db.getOffers(
                             `${nft.contract.address}/${tokenId}`
                         );
+                        console.log("DATABASE offers", offers);
                         if (!offers) {
-                            setIncomingOffers([]);
-                            setIsLoading(false);
-                            return;
+                            continue;
                         }
-                        let validOffers: Offer[] = [];
+                        console.log("ALL OFFERS:", offers);
                         for (const offer of offers) {
                             console.log(offer);
                             const orderHash = seaport.getOrderHash(
@@ -65,15 +67,21 @@ const Offers: NextPage = () => {
                                 status.isCancelled ||
                                 status.totalFilled.gt(0) //check if order has been filled
                             ) {
-                                return;
+                                console.log("X", offer);
+                                continue;
                             }
                             validOffers.push(offer);
                         }
-                        setIncomingOffers(validOffers);
-                        setIsLoading(false);
-                    };
-                    if (db.initialized) return await setValidOffers();
+                    }
+                    setIncomingOffers(validOffers);
+                    setIsLoading(false);
+                };
+                if (db.initialized) {
+                    await setValidOffers();
+                    console.log("Called setValidOffers");
+                } else {
                     db.on("ready", setValidOffers);
+                    console.log("Called setValidOffers");
                 }
             } catch (err: any) {
                 toast.error("Error getting offers");
