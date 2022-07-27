@@ -14,9 +14,10 @@ import { OrderWithCounter } from "@opensea/seaport-js/lib/types";
 const Offers: NextPage = () => {
     const [incomingOffers, setIncomingOffers] = useState<Offer[]>([]);
     const [seaport, setSeaport] = useState<Seaport>();
-    const [isLoading, setIsLoading] = useState(false);
+    const [isOffersLoading, setIsOffersLoading] = useState(false);
     const { address } = useAccount();
     const { chain } = useNetwork();
+    db.on("offersUpdated", getIncomingOrders);
 
     useEffect(() => {
         let seaport: Seaport;
@@ -27,7 +28,7 @@ const Offers: NextPage = () => {
             setSeaport(seaport);
         }
         async function getIncomingOrders() {
-            setIsLoading(true);
+            setIsOffersLoading(true);
             try {
                 if (!seaport) return;
                 const res = await fetch(
@@ -35,28 +36,23 @@ const Offers: NextPage = () => {
                 );
                 const resBody = await res.json();
                 const nfts = resBody.ownedNfts;
-                console.log("OWNED NFTS", nfts);
                 if (!nfts.length) {
                     setIncomingOffers([]);
-                    setIsLoading(false);
+                    setIsOffersLoading(false);
                     return;
                 }
                 let validOffers: Offer[] = [];
                 const setValidOffers = async () => {
                     for (const nft of nfts) {
-                        console.log(nft.contract.address);
                         const tokenId = parseInt(nft.id.tokenId, 16);
 
                         const offers = db.getOffers(
                             `${nft.contract.address}/${tokenId}`
                         );
-                        console.log("DATABASE offers", offers);
-                        if (!offers) {
+                        if (!offers?.length) {
                             continue;
                         }
-                        console.log("ALL OFFERS:", offers);
                         for (const offer of offers) {
-                            console.log(offer);
                             const orderHash = seaport.getOrderHash(
                                 offer.parameters
                             );
@@ -67,30 +63,78 @@ const Offers: NextPage = () => {
                                 status.isCancelled ||
                                 status.totalFilled.gt(0) //check if order has been filled
                             ) {
-                                console.log("X", offer);
                                 continue;
                             }
                             validOffers.push(offer);
                         }
                     }
                     setIncomingOffers(validOffers);
-                    setIsLoading(false);
+                    setIsOffersLoading(false);
                 };
                 if (db.initialized) {
                     await setValidOffers();
-                    console.log("Called setValidOffers");
                 } else {
                     db.on("ready", setValidOffers);
-                    console.log("Called setValidOffers");
                 }
             } catch (err: any) {
                 toast.error("Error getting offers");
-                setIsLoading(false);
+                setIsOffersLoading(false);
             }
         }
         getIncomingOrders();
     }, [address, chain]);
+    async function getIncomingOrders() {
+        setIsOffersLoading(true);
+        try {
+            if (!seaport) return;
+            const res = await fetch(
+                `/api/nft/userowned/${address}?chain_id=${chain?.id}`
+            );
+            const resBody = await res.json();
+            const nfts = resBody.ownedNfts;
+            if (!nfts.length) {
+                setIncomingOffers([]);
+                setIsOffersLoading(false);
+                return;
+            }
+            let validOffers: Offer[] = [];
+            const setValidOffers = async () => {
+                for (const nft of nfts) {
+                    const tokenId = parseInt(nft.id.tokenId, 16);
 
+                    const offers = db.getOffers(
+                        `${nft.contract.address}/${tokenId}`
+                    );
+                    if (!offers?.length) {
+                        continue;
+                    }
+                    for (const offer of offers) {
+                        const orderHash = seaport.getOrderHash(
+                            offer.parameters
+                        );
+                        const status = await seaport.getOrderStatus(orderHash);
+                        if (
+                            status.isCancelled ||
+                            status.totalFilled.gt(0) //check if order has been filled
+                        ) {
+                            continue;
+                        }
+                        validOffers.push(offer);
+                    }
+                }
+                setIncomingOffers(validOffers);
+                setIsOffersLoading(false);
+            };
+            if (db.initialized) {
+                await setValidOffers();
+            } else {
+                db.on("ready", setValidOffers);
+            }
+        } catch (err: any) {
+            toast.error("Error getting offers");
+            setIsOffersLoading(false);
+        }
+    }
     async function acceptBidOffer(offer: Offer) {
         if (!seaport) return;
         const order: OrderWithCounter = {
@@ -98,7 +142,6 @@ const Offers: NextPage = () => {
             signature: offer.signature,
         };
         try {
-            console.log(order);
             const { executeAllActions: executeAllFulfillActions } =
                 await seaport.fulfillOrder({
                     order,
@@ -106,7 +149,16 @@ const Offers: NextPage = () => {
                 });
 
             const transaction = await executeAllFulfillActions();
-            toast.success("Offer completed!");
+            await toast.promise(transaction.wait, {
+                pending: "Transaction pending",
+                success: "Transaction confired",
+                error: {
+                    render({ data }) {
+                        return `Transaction failed: ${data.message}`;
+                    },
+                },
+            });
+            getIncomingOrders();
         } catch (err: any) {
             console.error(err);
         }
@@ -116,7 +168,7 @@ const Offers: NextPage = () => {
             <Head>
                 <title>Offers - Toffi</title>
             </Head>
-            {isLoading && (
+            {isOffersLoading && (
                 <progress className="progress w-100 p-0 align-top absolute"></progress>
             )}
             <div className="overflow-x-auto pt-5 text-center">
@@ -135,81 +187,86 @@ const Offers: NextPage = () => {
                             </Table.Head>
 
                             <Table.Body>
-                                {incomingOffers.map((offer, i) => (
-                                    <Table.Row key={i}>
-                                        <div className="flex items-center space-x-3 truncate relative">
-                                            <Mask
-                                                variant="squircle"
-                                                src="https://via.placeholder.com/1000/252b3a/c?text=No+image"
-                                                style={{ maxHeight: "5em" }}
-                                            />
-                                            <div>
-                                                <div className="font-bold">
-                                                    {offer.parameters.consideration[0].token.substring(
-                                                        0,
-                                                        5
-                                                    )}
-                                                    ...
-                                                    {offer.parameters.offerer.slice(
-                                                        -3
-                                                    )}
-                                                </div>
-                                                <div className="text-sm opacity-50">
-                                                    #
-                                                    {
-                                                        offer.parameters
-                                                            .consideration[0]
-                                                            .identifierOrCriteria
-                                                    }
+                                {incomingOffers
+                                    .slice(0)
+                                    .reverse()
+                                    .map((offer, i) => (
+                                        <Table.Row key={i}>
+                                            <div className="flex items-center space-x-3 truncate relative">
+                                                <Mask
+                                                    variant="squircle"
+                                                    src="https://via.placeholder.com/1000/252b3a/c?text=No+image"
+                                                    style={{ maxHeight: "5em" }}
+                                                />
+                                                <div>
+                                                    <div className="font-bold">
+                                                        {offer.parameters.consideration[0].token.substring(
+                                                            0,
+                                                            5
+                                                        )}
+                                                        ...
+                                                        {offer.parameters.offerer.slice(
+                                                            -3
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm opacity-50">
+                                                        #
+                                                        {
+                                                            offer.parameters
+                                                                .consideration[0]
+                                                                .identifierOrCriteria
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div>
-                                            {ethers.utils.formatUnits(
-                                                offer.parameters.offer[0]
-                                                    .startAmount,
-                                                offer.tokenDecimals
-                                            )}{" "}
-                                            {
-                                                // @ts-ignore
-                                                tokens[
-                                                    offer.parameters.offer[0].token.toLowerCase()
-                                                ].symbol
-                                            }
-                                            <br />
-                                            <Badge color="ghost" size="sm">
-                                                {offer.market}
-                                            </Badge>
-                                        </div>
-                                        <div>
-                                            {offer.parameters.offerer.substring(
-                                                0,
-                                                5
-                                            )}
-                                            ...
-                                            {offer.parameters.offerer.slice(-3)}
-                                        </div>
-                                        <div>
-                                            {new Date(
-                                                Number(
-                                                    offer.parameters.startTime.toString()
-                                                ) * 1000
-                                            ).toDateString()}
-                                        </div>
-                                        <Button
-                                            onClick={() =>
-                                                acceptBidOffer(offer)
-                                            }
-                                        >
-                                            Accept
-                                        </Button>
-                                    </Table.Row>
-                                ))}
+                                            <div>
+                                                {ethers.utils.formatUnits(
+                                                    offer.parameters.offer[0]
+                                                        .startAmount,
+                                                    offer.tokenDecimals
+                                                )}{" "}
+                                                {
+                                                    // @ts-ignore
+                                                    tokens[
+                                                        offer.parameters.offer[0].token.toLowerCase()
+                                                    ].symbol
+                                                }
+                                                <br />
+                                                <Badge color="ghost" size="sm">
+                                                    {offer.market}
+                                                </Badge>
+                                            </div>
+                                            <div>
+                                                {offer.parameters.offerer.substring(
+                                                    0,
+                                                    5
+                                                )}
+                                                ...
+                                                {offer.parameters.offerer.slice(
+                                                    -3
+                                                )}
+                                            </div>
+                                            <div>
+                                                {new Date(
+                                                    Number(
+                                                        offer.parameters.startTime.toString()
+                                                    ) * 1000
+                                                ).toDateString()}
+                                            </div>
+                                            <Button
+                                                onClick={() =>
+                                                    acceptBidOffer(offer)
+                                                }
+                                            >
+                                                Accept
+                                            </Button>
+                                        </Table.Row>
+                                    ))}
                             </Table.Body>
                         </Table>
                     </>
                 ) : (
-                    !isLoading && "No offers"
+                    !isOffersLoading && "No offers"
                 )}
             </div>
         </>

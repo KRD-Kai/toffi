@@ -6,8 +6,6 @@ class Database extends EventEmitter {
     ipfs: any;
     orbitdb: any;
     offerStore: any;
-    OffersKey: string;
-    Offers: [Offer];
     initialized: boolean;
 
     initialized: false;
@@ -16,7 +14,6 @@ class Database extends EventEmitter {
         this.ipfs = window["ipfs"];
         if (!this.ipfs) {
             const Ipfs = window["Ipfs"];
-            console.log(Ipfs);
             if (!Ipfs) return;
             this.ipfs = await Ipfs.create({
                 preload: { enabled: false },
@@ -44,14 +41,14 @@ class Database extends EventEmitter {
             },
         });
         await this.offerStore.load();
+        console.log(this.offerStore);
         this.emit("ready");
         this.initialized = true;
 
         // Update the value following replication
         this.offerStore.events.on("replicated", (e) => {
-            this.Offers = this.offerStore.get(this.OffersKey);
-            console.log(this.Offers);
-            console.log("test", e);
+            console.log("Offers updated");
+            this.emit("offersUpdated");
         });
     }
 
@@ -63,19 +60,19 @@ class Database extends EventEmitter {
     }
 
     getOffers(key: string): [Offer] {
-        this.OffersKey = key;
-        this.Offers = this.offerStore.get(this.OffersKey);
-        return this.Offers;
+        const offers = this.offerStore.get(key);
+        return offers;
     }
 
     setOffer(key: string, Offer: Partial<Offer>) {
-        const offers = this.getOffers(key);
-        if (offers) {
-            this.Offers = [...offers, Offer];
+        let offers = this.getOffers(key);
+        if (offers?.length) {
+            offers = [...offers, Offer];
         } else {
-            this.Offers = [Offer];
+            offers = [Offer];
         }
-        this.offerStore.put(key, this.Offers);
+        this.offerStore.put(key, offers);
+        console.log(this.offerStore);
     }
 }
 

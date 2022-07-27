@@ -174,6 +174,12 @@ export default function BidModal({
                             <Select.Option value={"seaport"}>
                                 Opensea/Seaport
                             </Select.Option>
+                            <Select.Option value={"rarible"} disabled>
+                                Rarible
+                            </Select.Option>
+                            <Select.Option value={"zora"} disabled>
+                                Zora
+                            </Select.Option>
                         </Select>
                         <Input
                             type="text"
