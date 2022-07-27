@@ -7,9 +7,10 @@ import { ethers } from "ethers";
 import { db } from "../db";
 import { Offer } from "../db/offer";
 import { toast } from "react-toastify";
-import { Table, Button, Mask, Checkbox, Badge } from "react-daisyui";
+import { Table, Button, Mask, Alert, Badge } from "react-daisyui";
 import tokens from "../tokens.json";
 import { OrderWithCounter } from "@opensea/seaport-js/lib/types";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const Offers: NextPage = () => {
     const [incomingOffers, setIncomingOffers] = useState<Offer[]>([]);
@@ -20,6 +21,7 @@ const Offers: NextPage = () => {
     db.on("offersUpdated", getIncomingOrders);
 
     useEffect(() => {
+        if (!address) return;
         let seaport: Seaport;
         if (typeof window.ethereum !== "undefined") {
             // @ts-ignore
@@ -83,6 +85,39 @@ const Offers: NextPage = () => {
         }
         getIncomingOrders();
     }, [address, chain]);
+
+    if (!address) {
+        return (
+            <div className="pt-10">
+                <Alert
+                    style={{ maxWidth: "30em", margin: "auto" }}
+                    className="m-10"
+                    icon={
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            className="w-6 h-6 mx-2 stroke-current"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                        </svg>
+                    }
+                    status="info"
+                >
+                    <div className="w-2/4">
+                        <ConnectButton />
+                    </div>
+                    Login to see incoming offers on your NFTs!
+                </Alert>
+            </div>
+        );
+    }
+
     async function getIncomingOrders() {
         setIsOffersLoading(true);
         try {
