@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -9,11 +10,12 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps): JSX.Element => {
     return (
-        <>
+        <div className="flex flex-col h-screen">
             <header>
                 <Navbar />
             </header>
-            <main>{children}</main>
+            <main className="flex-grow">{children}</main>
+            <Footer />
             <ToastContainer
                 position="top-right"
                 autoClose={5000}
@@ -26,7 +28,7 @@ const Layout = ({ children }: LayoutProps): JSX.Element => {
                 pauseOnHover
                 theme="dark"
             />
-        </>
+        </div>
     );
 };
 
