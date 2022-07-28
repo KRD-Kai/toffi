@@ -4,7 +4,6 @@ import { FormEvent, useState } from "react";
 import { Input, Button, InputGroup } from "react-daisyui";
 import { useNetwork } from "wagmi";
 import NFTSearchResults from "../components/NFTSearchResults";
-import { db } from "../db";
 
 const Explore: NextPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -52,7 +51,7 @@ const Explore: NextPage = () => {
                     </InputGroup>
                 </form>
             </div>
-            {response && (
+            {response ? (
                 <div
                     className="pt-5 pb-5 pl-3 pr-3 gap-3 grid w-full place-items-center"
                     style={{
@@ -62,6 +61,11 @@ const Explore: NextPage = () => {
                     }}
                 >
                     <NFTSearchResults res={response} />
+                </div>
+            ) : (
+                <div className="text-sm italic opacity-80 text-center pt-5">
+                    NFT search results currently only return what the NFTPort
+                    search API has indexed
                 </div>
             )}
         </>
